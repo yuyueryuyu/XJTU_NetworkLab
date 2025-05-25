@@ -171,7 +171,7 @@ print("</body></html>")
 - `http://localhost:8080` - HTTP服务
 - `https://localhost:8443` - HTTPS服务（需要接受自签名证书警告）
 
-## 📊 日志系统
+## 日志系统
 
 服务器会在`www/server_log.log`中记录：
 - 客户端IP地址和端口
