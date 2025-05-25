@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>服务器100 Continue测试工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .control-panel {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f0f8ff;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .log-container {
+            border: 1px solid #ddd;
+            padding: 10px;
+            height: 300px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .input-group {
+            margin-bottom: 10px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>服务器100 Continue响应测试工具</h1>
+        
+        <div class="control-panel">
+            <div class="input-group">
+                <label for="endpoint">服务器端点URL:</label>
+                <input type="text" id="endpoint" value="/your-endpoint" placeholder="例如: https://example.com/api/upload">
+            </div>
+            <div class="input-group">
+                <label for="data-size">测试数据大小 (MB):</label>
+                <input type="text" id="data-size" value="10" placeholder="输入数字，例如: 10">
+            </div>
+            <button id="start-test">开始测试</button>
+            <button id="clear-log">清除日志</button>
+        </div>
+        
+        <h3>测试日志:</h3>
+        <div id="log" class="log-container"></div>
+    </div>
+
+    <script>
+        // 日志函数
+        function log(message, isError = false) {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.style.color = isError ? 'red' : 'black';
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logElement.appendChild(logEntry);
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        // 使用fetch API测试服务器100 Continue响应
+        async function test100Continue(endpoint, dataSizeMB) {
+    try {
+        // Create a large data buffer
+        const largeData = new ArrayBuffer(dataSizeMB * 1024 * 1024);
+        const view = new Uint8Array(largeData);
+        // Fill with some data if needed
+        for (let i = 0; i < view.length; i += 1024) {
+            view[i] = i % 256;
+        }
+        
+        console.log(`Sending large request to ${endpoint}...`);
+        console.log(`Request body size: ${(largeData.byteLength / (1024 * 1024)).toFixed(2)} MB`);
+        
+        // Use fetch API which is more modern
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/octet-stream',
+                // Note: Expect header will likely be ignored by the browser
+            },
+            body: largeData
+        });
+        
+        console.log(`Request completed with status: ${response.status}`);
+        const responseText = await response.text();
+        
+        return {
+            success: response.ok,
+            finalStatus: response.status,
+            response: responseText
+        };
+    } catch (error) {
+        console.error(`Error during test: ${error.message}`);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+        // 执行测试
+        async function runTest() {
+            const endpoint = document.getElementById('endpoint').value;
+            const dataSizeMB = parseInt(document.getElementById('data-size').value) || 10;
+            
+            try {
+                const result = await test100Continue(endpoint, dataSizeMB);
+                log(`测试结果: ${JSON.stringify(result, null, 2)}`);
+            } catch (error) {
+                log(`测试失败: ${JSON.stringify(error, null, 2)}`, true);
+            }
+        }
+
+        // 添加事件监听器
+        document.getElementById('start-test').addEventListener('click', runTest);
+        document.getElementById('clear-log').addEventListener('click', () => {
+            document.getElementById('log').innerHTML = '';
+        });
+
+        // 初始化日志
+        log("测试工具已准备就绪。请设置端点URL和数据大小，然后点击'开始测试'按钮。");
+        log("注意：浏览器环境通常无法直接观察到100 Continue状态码，因为这是一个中间状态，浏览器会自动处理。");
+        log("这个测试主要用于验证服务器是否能正确处理带有'Expect: 100-continue'头的大型请求。");
+    </script>
+</body>
+</html>

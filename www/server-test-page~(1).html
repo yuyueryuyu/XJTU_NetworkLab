@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Functionality Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .test-section {
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        .test-button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-left: 4px solid #2196F3;
+            background-color: #E3F2FD;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        .success {
+            border-left-color: #4CAF50;
+            background-color: #E8F5E9;
+        }
+        .failure {
+            border-left-color: #F44336;
+            background-color: #FFEBEE;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        code {
+            background-color: #f9f9f9;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: Consolas, monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>Server Functionality Test</h1>
+    
+    <div class="test-section">
+        <h2>1. HTTP Methods Test</h2>
+        <p>This test verifies if the server supports GET, HEAD, and POST methods.</p>
+        <button class="test-button" onclick="testHttpMethods()">Run HTTP Methods Test</button>
+        <div id="methods-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. URI Encoding Test</h2>
+        <p>This test verifies if the server correctly handles URI percent-encoding (e.g., %7E for tilde).</p>
+        <button class="test-button" onclick="testUriEncoding()">Run URI Encoding Test</button>
+        <div id="uri-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. HTTP Status Codes Test</h2>
+        <p>This test verifies if the server returns correct status codes.</p>
+        <button class="test-button" onclick="testStatusCodes()">Run Status Codes Test</button>
+        <div id="status-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Connection Mode Test</h2>
+        <p>This test verifies if the server supports Keep-Alive and Close connection modes.</p>
+        <button class="test-button" onclick="testConnectionModes()">Run Connection Modes Test</button>
+        <div id="connection-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Results Summary</h2>
+        <table id="results-table">
+            <tr>
+                <th>Test</th>
+                <th>Status</th>
+                <th>Details</th>
+            </tr>
+            <tr>
+                <td>HTTP Methods</td>
+                <td id="methods-status">Not Run</td>
+                <td id="methods-details">-</td>
+            </tr>
+            <tr>
+                <td>URI Encoding</td>
+                <td id="uri-status">Not Run</td>
+                <td id="uri-details">-</td>
+            </tr>
+            <tr>
+                <td>Status Codes</td>
+                <td id="status-status">Not Run</td>
+                <td id="status-details">-</td>
+            </tr>
+            <tr>
+                <td>Connection Modes</td>
+                <td id="connection-status">Not Run</td>
+                <td id="connection-details">-</td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        // Utility function to update result display
+        function updateResult(elementId, text, success = true) {
+            const element = document.getElementById(elementId);
+            element.textContent = text;
+            if (success) {
+                element.classList.add('success');
+                element.classList.remove('failure');
+            } else {
+                element.classList.add('failure');
+                element.classList.remove('success');
+            }
+        }
+
+        // Utility function to update summary table
+        function updateSummary(test, status, details) {
+            document.getElementById(`${test}-status`).textContent = status;
+            document.getElementById(`${test}-details`).textContent = details;
+            
+            if (status === 'Pass') {
+                document.getElementById(`${test}-status`).style.color = '#4CAF50';
+            } else if (status === 'Fail') {
+                document.getElementById(`${test}-status`).style.color = '#F44336';
+            } else {
+                document.getElementById(`${test}-status`).style.color = '#FFA000';
+            }
+        }
+
+        // Test HTTP Methods (GET, HEAD, POST)
+        async function testHttpMethods() {
+            updateResult('methods-result', 'Running HTTP methods test...');
+            let results = [];
+            let passed = true;
+            
+            try {
+                // Test GET
+                const getResponse = await fetch(window.location.href, {
+                    method: 'GET',
+                    cache: 'no-store' // Prevent caching
+                });
+                const getStatus = getResponse.status;
+                const getData = await getResponse.text();
+                results.push(`GET: Status ${getStatus}, Content length: ${getData.length} bytes`);
+                
+                // Test HEAD
+                const headResponse = await fetch(window.location.href, {
+                    method: 'HEAD',
+                    cache: 'no-store'
+                });
+                const headStatus = headResponse.status;
+                const headData = await headResponse.text();
+                results.push(`HEAD: Status ${headStatus}, Content length: ${headData.length} bytes (should be 0)`);
+                
+                // Test POST
+                const postResponse = await fetch(window.location.href, {
+                    method: 'POST',
+                    body: 'test=value',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    cache: 'no-store'
+                });
+                const postStatus = postResponse.status;
+                results.push(`POST: Status ${postStatus}`);
+                
+                // Verify all tests passed
+                if (getStatus !== 200 || headStatus !== 200 || postStatus !== 200 || headData.length !== 0) {
+                    passed = false;
+                }
+                
+                updateResult('methods-result', results.join('\n'), passed);
+                updateSummary('methods', passed ? 'Pass' : 'Fail', 
+                    passed ? 'Server supports GET, HEAD, and POST methods' : 
+                    'Some HTTP methods may not be properly supported');
+                
+            } catch (error) {
+                updateResult('methods-result', `Error testing HTTP methods: ${error.message}`, false);
+                updateSummary('methods', 'Fail', `Error: ${error.message}`);
+            }
+        }
+
+        // Test URI Encoding
+        async function testUriEncoding() {
+            updateResult('uri-result', 'Running URI encoding test...');
+            let results = [];
+            let passed = true;
+            
+            try {
+                // Generate a test path with both normal and encoded versions
+                const basePath = window.location.pathname;
+                const pathParts = basePath.split('/');
+                const fileName = pathParts[pathParts.length - 1];
+                
+                // Create paths with a tilde character (normal and encoded)
+                const normalPath = `server-test-page~(1).html`;
+                const encodedPath = `server-test-page%7E(1).html`;
+                
+                // Test normal path
+                const normalResponse = await fetch(normalPath, {
+                    cache: 'no-store'
+                });
+                const normalStatus = normalResponse.status;
+                results.push(`Normal path (${normalPath}): Status ${normalStatus}`);
+                
+                // Test encoded path
+                const encodedResponse = await fetch(encodedPath, {
+                    cache: 'no-store'
+                });
+                const encodedStatus = encodedResponse.status;
+                results.push(`Encoded path (${encodedPath}): Status ${encodedStatus}`);
+                
+                // Verify both paths give same status (should be equivalent)
+                if (normalStatus !== encodedStatus) {
+                    passed = false;
+                    results.push('ERROR: Different status codes for equivalent URIs');
+                } else {
+                    results.push('SUCCESS: Both normal and encoded URIs return the same status code');
+                }
+                
+                updateResult('uri-result', results.join('\n'), passed);
+                updateSummary('uri', passed ? 'Pass' : 'Fail', 
+                    passed ? 'Server correctly handles URI percent-encoding' : 
+                    'URI percent-encoding may not be properly handled');
+                
+            } catch (error) {
+                updateResult('uri-result', `Error testing URI encoding: ${error.message}`, false);
+                updateSummary('uri', 'Fail', `Error: ${error.message}`);
+            }
+        }
+
+        // Test HTTP Status Codes
+        async function testStatusCodes() {
+            updateResult('status-result', 'Running status codes test...');
+            let results = [];
+            let testsPassed = 0;
+            let testsTotal = 0;
+            
+            try {
+                // Test 200 OK (current page)
+                testsTotal++;
+                const ok200Response = await fetch(window.location.href, {
+                    cache: 'no-store'
+                });
+                const okStatus = ok200Response.status;
+                results.push(`200 OK test: ${okStatus === 200 ? 'PASS' : 'FAIL'} (Status: ${okStatus})`);
+                if (okStatus === 200) testsPassed++;
+                
+                // Test 404 Not Found (non-existent page)
+                testsTotal++;
+                const notFoundResponse = await fetch(`${window.location.pathname}-nonexistent-${Date.now()}`, {
+                    cache: 'no-store'
+                });
+                const notFoundStatus = notFoundResponse.status;
+                results.push(`404 Not Found test: ${notFoundStatus === 404 ? 'PASS' : 'FAIL'} (Status: ${notFoundStatus})`);
+                if (notFoundStatus === 404) testsPassed++;
+                
+                // Test conditional GET for 304 Not Modified
+                // First get the resource with ETag/Last-Modified
+                testsTotal++;
+                const initialResponse = await fetch(window.location.href, {
+                    cache: 'no-store'
+                });
+                const etag = initialResponse.headers.get('ETag');
+                const lastModified = initialResponse.headers.get('Last-Modified');
+                
+                if (etag || lastModified) {
+                    const headers = new Headers();
+                    if (etag) {
+                        headers.append('If-None-Match', etag);
+                    }
+                    if (lastModified) {
+                        headers.append('If-Modified-Since', lastModified);
+                    }
+                    
+                    const conditionalResponse = await fetch(window.location.href, {
+                        headers: headers
+                    });
+                    
+                    const notModifiedStatus = conditionalResponse.status;
+                    results.push(`304 Not Modified test: ${notModifiedStatus === 304 ? 'PASS' : 'WARNING'} (Status: ${notModifiedStatus})`);
+                    if (notModifiedStatus === 304) testsPassed++;
+                } else {
+                    results.push('304 Not Modified test: SKIPPED (No ETag or Last-Modified header present)');
+                }
+                
+                // Summarize results
+                results.push(`\nSummary: ${testsPassed}/${testsTotal} status code tests passed`);
+                const passed = testsPassed > 0;
+                
+                updateResult('status-result', results.join('\n'), passed);
+                updateSummary('status', passed ? 'Pass' : 'Fail', 
+                    `${testsPassed}/${testsTotal} status code tests passed`);
+                
+            } catch (error) {
+                updateResult('status-result', `Error testing status codes: ${error.message}`, false);
+                updateSummary('status', 'Fail', `Error: ${error.message}`);
+            }
+        }
+
+        // Test Connection Modes (Keep-Alive and Close)
+        async function testConnectionModes() {
+            updateResult('connection-result', 'Running connection modes test...');
+            let results = [];
+            let passed = true;
+            
+            try {
+                // Test with Connection: Keep-Alive
+                const keepAliveHeaders = new Headers();
+                keepAliveHeaders.append('Connection', 'keep-alive');
+                
+                const keepAliveResponse = await fetch(window.location.href, {
+                    headers: keepAliveHeaders,
+                    cache: 'no-store'
+                });
+                
+                const keepAliveConnectionHeader = keepAliveResponse.headers.get('Connection');
+                results.push(`Keep-Alive test: Response Connection header: ${keepAliveConnectionHeader || 'None'}`);
+                
+                // Test with Connection: Close
+                const closeHeaders = new Headers();
+                closeHeaders.append('Connection', 'close');
+                
+                const closeResponse = await fetch(window.location.href, {
+                    headers: closeHeaders,
+                    cache: 'no-store'
+                });
+                
+                const closeConnectionHeader = closeResponse.headers.get('Connection');
+                results.push(`Close test: Response Connection header: ${closeConnectionHeader || 'None'}`);
+                
+                // Check for server behavior
+                // Note: The browser might handle connection pooling, so we infer support from status codes
+                if (keepAliveResponse.status === 200 && closeResponse.status === 200) {
+                    results.push('\nBoth connection modes appear to work (successful responses)');
+                    results.push('Note: Connection header handling is typically handled by the browser and server');
+                    results.push('For a more accurate test, use a network tool like curl or Postman');
+                } else {
+                    passed = false;
+                    results.push('\nWARNING: One or both connection modes returned non-200 status');
+                }
+                
+                updateResult('connection-result', results.join('\n'), passed);
+                updateSummary('connection', passed ? 'Pass' : 'Partial', 
+                    passed ? 'Both Keep-Alive and Close connections appear to work' : 
+                    'Connection mode support could not be fully verified');
+                
+            } catch (error) {
+                updateResult('connection-result', `Error testing connection modes: ${error.message}`, false);
+                updateSummary('connection', 'Fail', `Error: ${error.message}`);
+            }
+        }
+        
+        // Run all tests
+        function runAllTests() {
+            testHttpMethods();
+            setTimeout(testUriEncoding, 500);
+            setTimeout(testStatusCodes, 1000);
+            setTimeout(testConnectionModes, 1500);
+        }
+        
+        // Add event listener for page load
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('Test page loaded. Ready to run tests.');
+        });
+    </script>
+    
+    <div class="test-section">
+        <h2>Run All Tests</h2>
+        <button class="test-button" onclick="runAllTests()" style="background-color: #2196F3;">Run All Tests</button>
+        <p>Click the button above to run all server functionality tests at once.</p>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Descriptions</h2>
+        <h3>HTTP Methods Test</h3>
+        <p>Verifies that the server correctly responds to:</p>
+        <ul>
+            <li><code>GET</code> - Should return the full page content</li>
+            <li><code>HEAD</code> - Should return only headers, no body</li>
+            <li><code>POST</code> - Should accept form data</li>
+        </ul>
+        
+        <h3>URI Encoding Test</h3>
+        <p>Verifies that the server treats normal characters and their percent-encoded equivalents identically.</p>
+        <p>Example: <code>~</code> (tilde) and <code>%7E</code> should be processed the same way.</p>
+        
+        <h3>HTTP Status Codes Test</h3>
+        <p>Checks if the server returns appropriate status codes:</p>
+        <ul>
+            <li><code>200 OK</code> - For successful requests</li>
+            <li><code>404 Not Found</code> - For resources that don't exist</li>
+            <li><code>304 Not Modified</code> - For conditional requests when content hasn't changed</li>
+        </ul>
+        
+        <h3>Connection Modes Test</h3>
+        <p>Verifies that the server supports both:</p>
+        <ul>
+            <li><code>Connection: Keep-Alive</code> - Persistent connections</li>
+            <li><code>Connection: Close</code> - Non-persistent connections</li>
+        </ul>
+    </div>
+</body>
+</html>

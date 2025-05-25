@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Server Functionality Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .test-section {
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        .test-button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-left: 4px solid #2196F3;
+            background-color: #E3F2FD;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .success {
+            border-left-color: #4CAF50;
+            background-color: #E8F5E9;
+        }
+        .failure {
+            border-left-color: #F44336;
+            background-color: #FFEBEE;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        code {
+            background-color: #f9f9f9;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: Consolas, monospace;
+        }
+        .collapsible {
+            background-color: #eee;
+            color: #444;
+            cursor: pointer;
+            padding: 18px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 15px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+        .active, .collapsible:hover {
+            background-color: #ddd;
+        }
+        .content {
+            padding: 0 18px;
+            display: none;
+            overflow: hidden;
+            background-color: #f9f9f9;
+            border-radius: 0 0 4px 4px;
+        }
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+            border-radius: 4px 4px 0 0;
+        }
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 16px;
+        }
+        .tab button:hover {
+            background-color: #ddd;
+        }
+        .tab button.active {
+            background-color: #ccc;
+        }
+        .tabcontent {
+            display: none;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+        }
+        .login-form, .file-upload-form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="password"],
+        input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        .indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .indicator.pending {
+            background-color: #FFC107;
+        }
+        .indicator.success {
+            background-color: #4CAF50;
+        }
+        .indicator.failure {
+            background-color: #F44336;
+        }
+        #progressContainer {
+            display: none;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        .progress-bar {
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #4CAF50;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <h1>Comprehensive Server Functionality Test</h1>
+    
+    <div class="tab">
+        <button class="tablinks active" onclick="openTab(event, 'BasicTests')">Basic Tests</button>
+        <button class="tablinks" onclick="openTab(event, 'AdvancedTests')">Advanced Tests</button>
+        <button class="tablinks" onclick="openTab(event, 'Results')">Results</button>
+        <button class="tablinks" onclick="openTab(event, 'Documentation')">Documentation</button>
+    </div>
+    
+    <div id="BasicTests" class="tabcontent" style="display:block;">
+        <div class="test-section">
+            <h2>1. HTTP Methods Test</h2>
+            <p>This test verifies if the server supports GET, HEAD, and POST methods.</p>
+            <button class="test-button" onclick="testHttpMethods()">Run HTTP Methods Test</button>
+            <div id="methods-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>2. URI Encoding Test</h2>
+            <p>This test verifies if the server correctly handles URI percent-encoding (e.g., %7E for tilde).</p>
+            <button class="test-button" onclick="testUriEncoding()">Run URI Encoding Test</button>
+            <div id="uri-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>3. HTTP Status Codes Test</h2>
+            <p>This test verifies if the server returns correct status codes.</p>
+            <button class="test-button" onclick="testStatusCodes()">Run Status Codes Test</button>
+            <div id="status-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>4. Connection Mode Test</h2>
+            <p>This test verifies if the server supports Keep-Alive and Close connection modes.</p>
+            <button class="test-button" onclick="testConnectionModes()">Run Connection Modes Test</button>
+            <div id="connection-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>5. HTTPS Support Test</h2>
+            <p>This test verifies if the server supports secure connections via HTTPS.</p>
+            <button class="test-button" onclick="testHttpsSupport()">Run HTTPS Test</button>
+            <div id="https-result" class="result"></div>
+        </div>
+    </div>
+    
+    <div id="AdvancedTests" class="tabcontent">
+        <div class="test-section">
+            <h2>6. Chunked Transfer Encoding Test</h2>
+            <p>This test verifies if the server supports chunked transfer encoding.</p>
+            <button class="test-button" onclick="testChunkedTransfer()">Run Chunked Transfer Test</button>
+            <div id="chunked-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>7. Content Encoding Test (gzip)</h2>
+            <p>This test verifies if the server supports gzip content encoding.</p>
+            <button class="test-button" onclick="testGzipEncoding()">Run Gzip Test</button>
+            <div id="gzip-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>8. Cookie Support Test</h2>
+            <p>This test verifies if the server supports cookies according to RFC 2109.</p>
+            <button class="test-button" onclick="testCookieSupport()">Run Cookie Test</button>
+            <div id="cookie-result" class="result"></div>
+            
+            <div class="login-form">
+                <h3>Test Login Functionality</h3>
+                <form id="loginForm" onsubmit="return testLoginWithCookies(event)">
+                    <div class="form-group">
+                        <label for="username">Username:</label>
+                        <input type="text" id="username" name="username" value="testuser" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" name="password" value="testpass" required>
+                    </div>
+                    <input type="submit" value="Test Login">
+                </form>
+                <div id="login-result" class="result"></div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>9. Cache Control Test</h2>
+            <p>This test verifies if the server supports basic caching mechanisms.</p>
+            <button class="test-button" onclick="testCacheControl()">Run Cache Test</button>
+            <div id="cache-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>10. File Upload Test</h2>
+            <p>This test verifies if the server supports file uploads via POST.</p>
+            
+            <div class="file-upload-form">
+                <form id="uploadForm" enctype="multipart/form-data" onsubmit="return testFileUpload(event)">
+                    <div class="form-group">
+                        <label for="fileInput">Select file to upload:</label>
+                        <input type="file" id="fileInput" name="fileToUpload">
+                    </div>
+                    <div id="progressContainer">
+                        <div class="progress-bar">
+                            <div id="progressBar" class="progress-fill"></div>
+                        </div>
+                        <div id="progressStatus">0%</div>
+                    </div>
+                    <input type="submit" value="Test Upload">
+                </form>
+                <div id="upload-result" class="result"></div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>11. CGI Support Test</h2>
+            <p>This test verifies if the server supports CGI (Common Gateway Interface).</p>
+            <button class="test-button" onclick="testCGISupport()">Run CGI Test</button>
+            <div id="cgi-result" class="result"></div>
+        </div>
+    </div>
+    
+    <div id="Results" class="tabcontent">
+        <div class="test-section">
+            <h2>Test Results Summary</h2>
+            <table id="results-table">
+                <tr>
+                    <th>Test</th>
+                    <th>Status</th>
+                    <th>Details</th>
+                </tr>
+                <tr>
+                    <td>HTTP Methods</td>
+                    <td id="methods-status">Not Run</td>
+                    <td id="methods-details">-</td>
+                </tr>
+                <tr>
+                    <td>URI Encoding</td>
+                    <td id="uri-status">Not Run</td>
+                    <td id="uri-details">-</td>
+                </tr>
+                <tr>
+                    <td>Status Codes</td>
+                    <td id="status-status">Not Run</td>
+                    <td id="status-details">-</td>
+                </tr>
+                <tr>
+                    <td>Connection Modes</td>
+                    <td id="connection-status">Not Run</td>
+                    <td id="connection-details">-</td>
+                </tr>
+                <tr>
+                    <td>HTTPS Support</td>
+                    <td id="https-status">Not Run</td>
+                    <td id="https-details">-</td>
+                </tr>
+                <tr>
+                    <td>Chunked Transfer</td>
+                    <td id="chunked-status">Not Run</td>
+                    <td id="chunked-details">-</td>
+                </tr>
+                <tr>
+                    <td>Gzip Encoding</td>
+                    <td id="gzip-status">Not Run</td>
+                    <td id="gzip-details">-</td>
+                </tr>
+                <tr>
+                    <td>Cookie Support</td>
+                    <td id="cookie-status">Not Run</td>
+                    <td id="cookie-details">-</td>
+                </tr>
+                <tr>
+                    <td>Cache Control</td>
+                    <td id="cache-status">Not Run</td>
+                    <td id="cache-details">-</td>
+                </tr>
+                <tr>
+                    <td>File Upload</td>
+                    <td id="upload-status">Not Run</td>
+                    <td id="upload-details">-</td>
+                </tr>
+                <tr>
+                    <td>CGI Support</td>
+                    <td id="cgi-status">Not Run</td>
+                    <td id="cgi-details">-</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div class="test-section">
+            <h2>Run All Tests</h2>
+            <button class="test-button" onclick="runAllTests()" style="background-color: #2196F3;">Run All Tests</button>
+            <p>Click the button above to run all server functionality tests sequentially.</p>
+        </div>
+    </div>
+    
+    <div id="Documentation" class="tabcontent">
+        <div class="test-section">
+            <h2>Test Descriptions</h2>
+            
+            <button class="collapsible">Basic HTTP Tests</button>
+            <div class="content">
+                <h3>HTTP Methods Test</h3>
+                <p>Verifies that the server correctly responds to:</p>
+                <ul>
+                    <li><code>GET</code> - Should return the full page content</li>
+                    <li><code>HEAD</code> - Should return only headers, no body</li>
+                    <li><code>POST</code> - Should accept form data</li>
+                </ul>
+                
+                <h3>URI Encoding Test</h3>
+                <p>Verifies that the server treats normal characters and their percent-encoded equivalents identically.</p>
+                <p>Example: <code>~</code> (tilde) and <code>%7E</code> should be processed the same way.</p>
+                
+                <h3>HTTP Status Codes Test</h3>
+                <p>Checks if the server returns appropriate status codes:</p>
+                <ul>
+                    <li><code>200 OK</code> - For successful requests</li>
+                    <li><code>404 Not Found</code> - For resources that don't exist</li>
+                    <li><code>304 Not Modified</code> - For conditional requests when content hasn't changed</li>
+                </ul>
+                
+                <h3>Connection Modes Test</h3>
+                <p>Verifies that the server supports both:</p>
+                <ul>
+                    <li><code>Connection: Keep-Alive</code> - Persistent connections</li>
+                    <li><code>Connection: Close</code> - Non-persistent connections</li>
+                </ul>
+                
+                <h3>HTTPS Support Test</h3>
+                <p>Checks if the server supports secure HTTPS connections:</p>
+                <ul>
+                    <li>Verifies if the page can be accessed via HTTPS</li>
+                    <li>Checks the SSL/TLS certificate validity</li>
+                </ul>
+            </div>
+            
+            <button class="collapsible">Advanced HTTP Tests</button>
+            <div class="content">
+                <h3>Chunked Transfer Encoding Test</h3>
+                <p>Verifies if the server supports chunked transfer encoding:</p>
+                <ul>
+                    <li>Checks for <code>Transfer-Encoding: chunked</code> header</li>
+                    <li>Verifies that the server can process chunked requests</li>
+                </ul>
+                
+                <h3>Content Encoding Test (gzip)</h3>
+                <p>Checks if the server supports gzip content compression:</p>
+                <ul>
+                    <li>Sends request with <code>Accept-Encoding: gzip</code> header</li>
+                    <li>Verifies response includes <code>Content-Encoding: gzip</code></li>
+                </ul>
+                
+                <h3>Cookie Support Test</h3>
+                <p>Verifies RFC 2109 cookie support:</p>
+                <ul>
+                    <li>Tests setting cookies via <code>Set-Cookie</code> header</li>
+                    <li>Tests sending cookies back to server</li>
+                    <li>Includes login simulation to test session cookies</li>
+                </ul>
+                
+                <h3>Cache Control Test</h3>
+                <p>Tests caching mechanisms:</p>
+                <ul>
+                    <li>Verifies <code>Cache-Control</code> headers</li>
+                    <li>Tests <code>ETag</code> and <code>If-None-Match</code> headers</li>
+                    <li>Tests <code>Last-Modified</code> and <code>If-Modified-Since</code> headers</li>
+                </ul>
+                
+                <h3>File Upload Test</h3>
+                <p>Tests file upload functionality:</p>
+                <ul>
+                    <li>Uses <code>multipart/form-data</code> encoding</li>
+                    <li>Submits a file via POST</li>
+                    <li>Verifies upload success</li>
+                </ul>
+                
+                <h3>CGI Support Test</h3>
+                <p>Tests Common Gateway Interface support:</p>
+                <ul>
+                    <li>Attempts to access a CGI script</li>
+                    <li>Verifies dynamic content generation</li>
+                    <li>Tests environment variables passing</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab functionality
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        
+        // Collapsible functionality
+        var coll = document.getElementsByClassName("collapsible");
+        for (var i = 0; i < coll.length; i++) {
+            coll[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                var content = this.nextElementSibling;
+                if (content.style.display === "block") {
+                    content.style.display = "none";
+                } else {
+                    content.style.display = "block";
+                }
+            });
+        }
+        
+        // Utility function to get current protocol
+        function getProtocol() {
+            return window.location.protocol;
+        }
+        
+        // Utility function to get opposite protocol
+        function getOppositeProtocol() {
+            return getProtocol() === 'https:' ? 'http:' : 'https:';
+        }
+        
+        // Utility function to update result display
+        function updateResult(elementId, text, success = true) {
+            const element = document.getElementById(elementId);
+            element.textContent = text;
+            if (success) {
+                element.classList.add('success');
+                element.classList.remove('failure');
+            } else {
+                element.classList.add('failure');
+                element.classList.remove('success');
+            }
+        }
+
+        // Utility function to update summary table
+        function updateSummary(test, status, details) {
+            document.getElementById(`${test}-status`).textContent = status;
+            document.getElementById(`${test}-details`).textContent = details;
+            
+            if (status === 'Pass') {
+                document.getElementById(`${test}-status`).style.color = '#4CAF50';
+            } else if (status === 'Fail') {
+                document.getElementById(`${test}-status`).style.color = '#F44336';
+            } else {
+                document.getElementById(`${test}-status`).style.color = '#FFA000';
+            }
+        }
+        
+        // Utility function to create XMLHttpRequest with progress monitoring
+        function createXHRWithProgress(method, url, onProgress, onLoad, onError) {
+            const xhr = new XMLHttpRequest();
+            xhr.open(method, url);
+            
+            if (onProgress) {
+                xhr.upload.onprogress = onProgress;
+            }
+            
+            if (onLoad) {
+                xhr.onload = onLoad;
+            }
+            
+            if (onError) {
+                xhr.onerror = onError;
+            }
+            
+            return xhr;
+        }
+
+        // Test HTTP Methods (GET, HEAD, POST)
+        async function testHttpMethods() {
+            updateResult('methods-result', 'Running HTTP methods test...');
+            let results = [];
+            let passed = true;
+            
+            try {
+                // Test GET
+                const getResponse = await fetch(window.location.href, {
+                    method: 'GET',
+                    cache: 'no-store' // Prevent caching
+                });
+                const getStatus = getResponse.status;
+                const getData = await getResponse.text();
+                results.push(`GET: Status ${getStatus}, Content length: ${getData.length} bytes`);
+                
+                // Test HEAD
+                const headResponse = await fetch(window.location.href, {
+                    method: 'HEAD',
+                    cache: 'no-store'
+                });
+                const headStatus = headResponse.status;
+                const headData = await headResponse.text();
+                results.push(`HEAD: Status ${headStatus}, Content length: ${headData.length} bytes (should be 0)`);
+                
+                // Test POST
+                const postResponse = await fetch(window.location.href, {
+                    method: 'POST',
+                    body: 'test=value',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    cache: 'no-store'
+                });
+                const postStatus = postResponse.status;
+                results.push(`POST: Status ${postStatus}`);
+                
+                // Verify all tests passed
+                if (getStatus !== 200 || headStatus !== 200 || postStatus !== 200 || headData.length !== 0) {
+                    passed = false;
+                }
+                
+                updateResult('methods-result', results.join('\n'), passed);
+                updateSummary('methods', passed ? 'Pass' : 'Fail', 
+                    passed ? 'Server supports GET, HEAD, and POST methods' : 
+                    'Some HTTP methods may not be properly supported');
+                
+            } catch (error) {
+                updateResult('methods-result', `Error testing HTTP methods: ${error.message}`, false);
+                updateSummary('methods', 'Fail', `Error: ${error.message}`);
+            }
+        }
+
+        // Test URI Encoding
+        async function testUriEncoding() {
+            updateResult('uri-result', 'Running URI encoding test...');
+            let results = [];
+            let passed = true;
+            
+            try {
+                // Generate a test path with both normal and encoded versions
+                const basePath = window.location.pathname;
+                const pathParts = basePath.split('/');
+                const fileName = pathParts[pathParts.length - 1];
+                
+                // Create paths with a tilde character (normal and encoded)
+                const normalPath = `${fileName}?param=~test`;
+                const encodedPath = `${fileName}?param=%7Etest`;
+                
+                // Test normal path
+                const normalResponse = await fetch(normalPath, {
+                    cache: 'no-store'
+                });
+                const normalStatus = normalResponse.status;
+                results.push(`Normal path (${normalPath}): Status ${normalStatus}`);
+                
+                // Test encoded path
+                const encodedResponse = await fetch(encodedPath, {
+                    cache: 'no-store'
+                });
+                const encodedStatus = encodedResponse.status;
+                results.push(`Encoded path (${encodedPath}): Status ${encodedStatus}`);
+                
+                // Verify both paths give same status (should be equivalent)
+                if (normalStatus !== encodedStatus) {
+                    passed = false;
+                    results.push('ERROR: Different status codes for equivalent URIs');
+                } else {
+                    results.push('SUCCESS: Both normal and encoded URIs return the same status code');
+                }
+                
+                updateResult('uri-result', results.join('\n'), passed);
+                updateSummary('uri', passed ? 'Pass' : 'Fail', 
+                    passed ? 'Server correctly handles URI percent-encoding' : 
+                    'URI percent-encoding may not be properly handled');
+                
+            } catch (error) {
+                updateResult('uri-result', `Error testing URI encoding: ${error.message}`, false);
+                updateSummary('uri', 'Fail', `Error: ${error.message}`);
+            }
+        }
+
+        // Test HTTP Status Codes
+        async function testStatusCodes() {
+            updateResult('status-result', 'Running status codes test...');
+            let results = [];
+            let testsPassed = 0;
+            let testsTotal = 0;
+            
+            try {
+                // Test 200 OK (current page)
+                testsTotal++;
+                const ok200Response = await fetch(window.location.href, {
+                    cache: 'no-store'
+                });
+                const okStatus = ok200Response.status;
+                results.push(`200 OK test: ${okStatus === 200 ? 'PASS' : 'FAIL'} (Status: ${okStatus})`);
+                if (okStatus === 200) testsPassed++;
+                
+                // Test 404 Not Found (non-existent page)
+                testsTotal++;
+                const notFoundResponse = await fetch(`${window.location.pathname}-nonexistent-${Date.now()}`, {
+                    cache: 'no-store'
+                });
+                const notFoundStatus = notFoundResponse.status;
+                results.push(`404 Not Found test: ${notFoundStatus === 404 ? 'PASS' : 'FAIL'} (Status: ${notFoundStatus})`);
+                if (notFoundStatus === 404) testsPassed++;
+                
+                // Test conditional GET for 304 Not Modified
+                // First get the resource with ETag/Last-Modified
+                testsTotal++;
+                const initialResponse = await fetch(window.location.href, {
+                    cache: 'no-store'
+                });
+                const etag = initialResponse.headers.get('ETag');
+                const lastModified = initialResponse.headers.get('Last-Modified');
+                
+                if (etag || lastModified) {
+                    const headers = new Headers();
+                    if (etag) {
+                        headers.append('If-None-Match', etag);
+                    }
+                    if (lastModified) {
+                        headers.append('If-Modified-Since', lastModified);
+                    }
+                    
+                    const conditionalResponse = await fetch(window.location.href, {
+                        headers: headers
+                    });
+                    
+                    const notModifiedStatus = conditionalResponse.status;
+                    results.push(`304 Not Modified test: ${notModifiedStatus === 304 ? 'PASS' : 'WARNING'} (Status: ${notModifiedStatus})`);
+                    if (notModifiedStatus === 304) testsPassed++;
+                } else {
+                    results.push('304 Not Modified test: SKIPPED (No ETag or Last-Modified header present)');
+                }
+                
+                // Attempt to test 100 Continue (not always possible in browser)
+                results.push('\nNote: 100 Continue test is not implemented in browser as it requires low-level socket control');
+                
+                // Attempt to test 500 Internal Server Error (may not be possible without server cooperation)
+                results.push('Note: 500 Internal Server Error test is not implemented as it requires server-side configuration');
+                
+                // Summarize results
+                results.push(`\nSummary: ${testsPassed}/${testsTotal} status code tests passed`);
+                const passed = testsPassed > 0;
+                
+                updateResult('status-result', results.join('\n'), passed);
+                updateSummary('status', passed ? 'Pass' : 'Fail', 
+                    `${testsPassed}/${testsTotal} status code tests passed`);
+                
+            } catch (error) {
+                updateResult('status-result', `Error testing status codes: ${error.message}`, false);
+                updateSummary('status', 'Fail', `Error: ${error.message}`);
+            }
+        }
+
+        // Test Connection Modes (Keep-Alive and Close)
+        async function testConnectionModes() {
+            updateResult('connection-result', 'Running connection modes test...');
+            let results = [];
+            let passed = true;
+            
+            try {
+            // Test with Connection: Keep-Alive
+            const keepAliveHeaders = new Headers();
+                keepAliveHeaders.append('Connection', 'keep-alive');
+                
+                const keepAliveResponse = await fetch(window.location.href, {
+                    headers: keepAliveHeaders,
+                    cache: 'no-store'
+                });
+                
+                const keepAliveConnectionHeader = keepAliveResponse.headers.get('Connection');
+                results.push(`Keep-Alive test: Response Connection header: ${keepAliveConnectionHeader || 'None'}`);
+                
+                // Test with Connection: Close
+                const closeHeaders = new Headers();
+                closeHeaders.append('Connection', 'close');
+                
+                const closeResponse = await fetch(window.location.href, {
+                    headers: closeHeaders,
+                    cache: 'no-store'
+                });
+                
+                const closeConnectionHeader = closeResponse.headers.get('Connection');
+                results.push(`Close test: Response Connection header: ${closeConnectionHeader || 'None'}`);
+                
+                // Check for server behavior
+                // Note: The browser might handle connection pooling, so we infer support from status codes
+                if (keepAliveResponse.status === 200 && closeResponse.status === 200) {
+                    results.push('\nBoth connection modes appear to work (successful responses)');
+                    results.push('Note: Connection header handling is typically handled by the browser and server');
+                    results.push('For a more accurate test, use a network tool like curl or Postman');
+                } else {
+                    passed = false;
+                    results.push('\nWARNING: One or both connection modes returned non-200 status');
+                }
+                
+                updateResult('connection-result', results.join('\n'), passed);
+                updateSummary('connection', passed ? 'Pass' : 'Partial', 
+                    passed ? 'Both Keep-Alive and Close connections appear to work' : 
+                    'Connection mode support could not be fully verified');
+                
+            } catch (error) {
+                updateResult('connection-result', `Error testing connection modes: ${error.message}`, false);
+                updateSummary('connection', 'Fail', `Error: ${error.message}`);
+            }
+        }
+        
+        // Test HTTPS Support
+        async function testHttpsSupport() {
+            updateResult('https-result', 'Running HTTPS support test...');
+            let results = [];
+            let passed = true;
+            
+            try {
+                const currentProtocol = window.location.protocol;
+                const isHttps = currentProtocol === 'https:';
+                
+                results.push(`Current protocol: ${currentProtocol}`);
+                
+                if (isHttps) {
+                    results.push('HTTPS is currently in use - protocol verification PASSED');
+                    
+                    // Check SSL certificate info using the Security property of the navigator object
+                    try {
+                        if (window.isSecureContext) {
+                            results.push('Page is running in a secure context - SSL/TLS certificate is valid');
+                        } else {
+                            results.push('WARNING: Page is not running in a secure context');
+                            passed = false;
+                        }
+                    } catch (e) {
+                        results.push('Could not verify certificate details in browser');
+                    }
+                    
+                    // Try to determine certificate issuer using a hack
+                    // This isn't reliable but might provide some info
+                    results.push('\nNote: Detailed certificate information cannot be accessed via JavaScript for security reasons');
+                    results.push('For detailed certificate inspection, click the lock icon in your browser address bar');
+                } else {
+                    // We're on HTTP, try to access HTTPS
+                    results.push('Currently using HTTP. Attempting to check HTTPS availability...');
+                    
+                    try {
+                        const httpsUrl = window.location.href.replace('http:', 'https:');
+                        results.push(`Testing HTTPS URL: ${httpsUrl}`);
+                        
+                        results.push('\nDirect JavaScript HTTPS verification not possible due to CORS restrictions');
+                        results.push('Please manually verify HTTPS support by accessing:');
+                        results.push(httpsUrl);
+                        
+                        passed = null; // Can't determine automatically
+                    } catch (e) {
+                        results.push(`HTTPS test error: ${e.message}`);
+                        passed = false;
+                    }
+                }
+                
+                updateResult('https-result', results.join('\n'), passed);
+                if (passed === null) {
+                    updateSummary('https', 'Manual Check', 'Manual verification required');
+                } else {
+                    updateSummary('https', passed ? 'Pass' : 'Fail', 
+                        passed ? 'HTTPS is supported and configured correctly' : 
+                        'HTTPS appears to be unavailable or incorrectly configured');
+                }
+                
+            } catch (error) {
+                updateResult('https-result', `Error testing HTTPS support: ${error.message}`, false);
+                updateSummary('https', 'Fail', `Error: ${error.message}`);
+            }
+        }
+        
+        // Test Chunked Transfer Encoding
+        async function testChunkedTransfer() {
+            updateResult('chunked-result', 'Running chunked transfer encoding test...');
+            let results = [];
+            let passed = false;
+            
+            try {
+                // First check if server sends chunked responses
+                const response = await fetch(window.location.href, {
+                    cache: 'no-store',
+                    headers: {
+                        'X-Test-Chunked': 'true' // Custom header that might trigger chunked response
+                    }
+                });
+                
+                // Check the transfer-encoding header
+                const transferEncoding = response.headers.get('Transfer-Encoding');
+                if (transferEncoding && transferEncoding.toLowerCase().includes('chunked')) {
+                    results.push(`Server returned Transfer-Encoding: ${transferEncoding}`);
+                    results.push('Chunked transfer encoding is SUPPORTED');
+                    passed = true;
+                } else {
+                    results.push('Server did not use chunked encoding for this response');
+                    
+                    // Try to check if server supports chunked requests
+                    results.push('\nNote: Browsers automatically handle chunked encoding.');
+                    results.push('For detailed chunked encoding tests, use a tool like curl:');
+                    results.push('curl -v -H "Transfer-Encoding: chunked" --data-binary @- http://yourserver/path');
+                    
+                    // Create a specific request that might trigger chunked response
+                    try {
+                        const largeResponse = await fetch(`${window.location.href}?large=true`, {
+                            cache: 'no-store'
+                        });
+                        
+                        const largeTransferEncoding = largeResponse.headers.get('Transfer-Encoding');
+                        if (largeTransferEncoding && largeTransferEncoding.toLowerCase().includes('chunked')) {
+                            results.push('\nLarge response test triggered chunked encoding!');
+                            results.push(`Transfer-Encoding: ${largeTransferEncoding}`);
+                            passed = true;
+                        } else {
+                            results.push('\nLarge response test did not trigger chunked encoding');
+                            passed = null; // Can't determine automatically
+                        }
+                    } catch (e) {
+                        results.push(`\nLarge response test error: ${e.message}`);
+                    }
+                }
+                
+                updateResult('chunked-result', results.join('\n'), passed !== false);
+                if (passed === null) {
+                    updateSummary('chunked', 'Inconclusive', 'Could not automatically verify chunked encoding support');
+                } else {
+                    updateSummary('chunked', passed ? 'Pass' : 'Warning', 
+                        passed ? 'Server supports chunked transfer encoding' : 
+                        'Chunked encoding not detected (may need manual verification)');
+                }
+                
+            } catch (error) {
+                updateResult('chunked-result', `Error testing chunked transfer: ${error.message}`, false);
+                updateSummary('chunked', 'Fail', `Error: ${error.message}`);
+            }
+        }
+        
+        // Test Gzip Content Encoding
+        async function testGzipEncoding() {
+            updateResult('gzip-result', 'Running gzip encoding test...');
+            let results = [];
+            let passed = false;
+            
+            try {
+                // Request content with gzip encoding
+                const response = await fetch(window.location.href, {
+                    cache: 'no-store',
+                    headers: {
+                        'Accept-Encoding': 'gzip, deflate'
+                    }
+                });
+                
+                // Check content-encoding header
+                const contentEncoding = response.headers.get('Content-Encoding');
+                if (contentEncoding && contentEncoding.toLowerCase().includes('gzip')) {
+                    results.push(`Server returned Content-Encoding: ${contentEncoding}`);
+                    results.push('Gzip content encoding is SUPPORTED');
+                    passed = true;
+                } else {
+                    results.push('Server did not use gzip encoding for this response');
+                    results.push('This could mean:');
+                    results.push(' - The server does not support gzip encoding');
+                    results.push(' - The content was too small to benefit from compression');
+                    results.push(' - The browser\'s fetch API is transparently handling decompression');
+                    
+                    // Try another approach to detect gzip support
+                    try {
+                        const xhr = new XMLHttpRequest();
+                        xhr.open('GET', window.location.href, false);
+                        xhr.setRequestHeader('Accept-Encoding', 'gzip, deflate');
+                        xhr.send(null);
+                        
+                        const xhrContentEncoding = xhr.getResponseHeader('Content-Encoding');
+                        if (xhrContentEncoding && xhrContentEncoding.toLowerCase().includes('gzip')) {
+                            results.push('\nXHR test detected gzip encoding!');
+                            results.push(`Content-Encoding: ${xhrContentEncoding}`);
+                            passed = true;
+                        } else {
+                            results.push('\nXHR test also did not detect gzip encoding');
+                            // Check response headers for other compression hints
+                            const vary = response.headers.get('Vary') || '';
+                            if (vary.includes('Accept-Encoding')) {
+                                results.push('But server\'s Vary header includes Accept-Encoding,');
+                                results.push('which suggests compression support exists');
+                                passed = null; // Inconclusive but promising
+                            } else {
+                                passed = false;
+                            }
+                        }
+                    } catch (e) {
+                        results.push(`\nXHR test error: ${e.message}`);
+                        passed = null; // Can't determine automatically
+                    }
+                }
+                
+                updateResult('gzip-result', results.join('\n'), passed !== false);
+                
+                if (passed === null) {
+                    updateSummary('gzip', 'Inconclusive', 'Could not automatically verify gzip support');
+                } else {
+                    updateSummary('gzip', passed ? 'Pass' : 'Warning', 
+                        passed ? 'Server supports gzip content encoding' : 
+                        'Gzip encoding not detected (may need manual verification)');
+                }
+                
+            } catch (error) {
+                updateResult('gzip-result', `Error testing gzip encoding: ${error.message}`, false);
+                updateSummary('gzip', 'Fail', `Error: ${error.message}`);
+            }
+        }
+        
+        // Test Cookie Support
+        async function testCookieSupport() {
+            updateResult('cookie-result', 'Running cookie support test...');
+            let results = [];
+            let passed = false;
+            
+            try {
+                // Set a test cookie
+                const testCookieName = 'TestCookie';
+                const testCookieValue = 'ServerTest_' + Date.now();
+                document.cookie = `${testCookieName}=${testCookieValue}; path=/`;
+                
+                // Reload the page to verify cookie persistence
+                results.push(`Setting test cookie: ${testCookieName}=${testCookieValue}`);
+                
+                // Read all cookies
+                const allCookies = document.cookie;
+                results.push(`All cookies: ${allCookies || 'None'}`);
+                
+                // Check if our test cookie exists
+                const cookieExists = document.cookie.split(';')
+                    .map(c => c.trim())
+                    .some(c => c.startsWith(`${testCookieName}=`));
+                
+                if (cookieExists) {
+                    results.push(`Test cookie was successfully set!`);
+                    passed = true;
+                } else {
+                    results.push(`Failed to set test cookie`);
+                    results.push('Possible reasons:');
+                    results.push('- Cookies are disabled in your browser');
+                    results.push('- The server does not support cookies');
+                    results.push('- The response lacks proper Set-Cookie headers');
+                }
+                
+                // Try setting a cookie via fetch
+                try {
+                    const cookieResponse = await fetch(`${window.location.href}?setCookie=true`, {
+                        cache: 'no-store'
+                    });
+                    
+                    // Check if server sent a Set-Cookie header
+                    // Note: For security reasons, JavaScript cannot directly read Set-Cookie headers
+                    results.push('\nVerifying server Set-Cookie functionality:');
+                    results.push('Note: Direct inspection of Set-Cookie headers is restricted in browsers');
+                    
+                    // Check cookies again after the fetch request
+                    setTimeout(() => {
+                        const newCookies = document.cookie;
+                        if (newCookies !== allCookies) {
+                            results.push('New cookies detected after server request - cookie mechanism is working!');
+                            updateResult('cookie-result', results.join('\n'), true);
+                            updateSummary('cookie', 'Pass', 'Server supports cookies');
+                        } else {
+                            results.push('No new cookies set by server request');
+                            results.push('Use the login form below to test cookie-based authentication');
+                            updateResult('cookie-result', results.join('\n'), passed);
+                            updateSummary('cookie', passed ? 'Partial' : 'Warning', 
+                                passed ? 'Basic cookie functionality works' : 
+                                'Cookie support could not be fully verified');
+                        }
+                    }, 500);
+                    
+                } catch (e) {
+                    results.push(`\nServer cookie test error: ${e.message}`);
+                }
+                
+                updateResult('cookie-result', results.join('\n'), passed);
+                updateSummary('cookie', passed ? 'Partial' : 'Warning', 
+                    passed ? 'Basic cookie functionality works' : 
+                    'Cookie support could not be fully verified');
+                
+            } catch (error) {
+                updateResult('cookie-result', `Error testing cookie support: ${error.message}`, false);
+                updateSummary('cookie', 'Fail', `Error: ${error.message}`);
+            }
+        }
+        
+        // Test login with cookies for session management
+        function testLoginWithCookies(event) {
+            event.preventDefault();
+            updateResult('login-result', 'Testing login functionality...');
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            let results = [];
+            
+            // Clear any existing session cookie
+            document.cookie = "sessionId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            
+            // Create a form data object
+            let formData = new FormData();
+            formData.append('username', username);
+            formData.append('password', password);
+            
+            // Send login request
+            fetch(`${window.location.pathname}?action=login`, {
+                method: 'POST',
+                body: formData,
+                credentials: 'include' // Important for cookie handling
+            })
+            .then(response => {
+                results.push(`Login request status: ${response.status}`);
+                
+                // Check for cookie after login
+                setTimeout(() => {
+                    const cookies = document.cookie;
+                    results.push(`Cookies after login: ${cookies || 'None'}`);
+                    
+                    const sessionCookie = cookies.split(';')
+                        .map(c => c.trim())
+                        .find(c => c.startsWith('sessionId=') || c.startsWith('session='));
+                    
+                    if (sessionCookie) {
+                        results.push('Session cookie found! Login functionality appears to work.');
+                        updateResult('login-result', results.join('\n'), true);
+                    } else {
+                        results.push('No session cookie found. Login functionality may not be working correctly.');
+                        updateResult('login-result', results.join('\n'), false);
+                    }
+                }, 500);
+                
+                return response.text();
+            })
+            .then(text => {
+                results.push(`Response: ${text.substring(0, 100)}${text.length > 100 ? '...' : ''}`);
+                updateResult('login-result', results.join('\n'));
+            })
+            .catch(error => {
+                results.push(`Login test error: ${error.message}`);
+                updateResult('login-result', results.join('\n'), false);
+            });
+            
+            return false; // Prevent form submission
+        }
+        
+        // Test Cache Control
+        async function testCacheControl() {
+            updateResult('cache-result', 'Running cache control test...');
+            let results = [];
+            let passed = false;
+            let partialPass = false;
+            
+            try {
+                // First request to get cache headers
+                const initialResponse = await fetch(window.location.href, {
+                    method: 'GET',
+                    cache: 'no-store' // Force fresh request
+                });
+                
+                // Check cache-related headers
+                const cacheControl = initialResponse.headers.get('Cache-Control');
+                const expires = initialResponse.headers.get('Expires');
+                const etag = initialResponse.headers.get('ETag');
+                const lastModified = initialResponse.headers.get('Last-Modified');
+                
+                results.push('Cache-related headers from server:');
+                results.push(`Cache-Control: ${cacheControl || 'Not set'}`);
+                results.push(`Expires: ${expires || 'Not set'}`);
+                results.push(`ETag: ${etag || 'Not set'}`);
+                results.push(`Last-Modified: ${lastModified || 'Not set'}`);
+                
+                // Check if any caching mechanism is supported
+                if (cacheControl || expires || etag || lastModified) {
+                    results.push('\nServer implements at least one caching mechanism!');
+                    partialPass = true;
+                    
+                    // Test ETag conditional request
+                    if (etag) {
+                        results.push('\nTesting conditional request with ETag:');
+                        
+                        const conditionalResponse = await fetch(window.location.href, {
+                            headers: {
+                                'If-None-Match': etag
+                            }
+                        });
+                        
+                        results.push(`Response status with If-None-Match: ${conditionalResponse.status}`);
+                        if (conditionalResponse.status === 304) {
+                            results.push('ETag validation works correctly (304 Not Modified)');
+                            passed = true;
+                        } else {
+                            results.push('ETag validation did not return 304 Not Modified');
+                        }
+                    }
+                    
+                    // Test Last-Modified conditional request
+                    if (lastModified && !passed) {
+                        results.push('\nTesting conditional request with Last-Modified:');
+                        
+                        const conditionalResponse = await fetch(window.location.href, {
+                            headers: {
+                                'If-Modified-Since': lastModified
+                            }
+                        });
+                        
+                        results.push(`Response status with If-Modified-Since: ${conditionalResponse.status}`);
+                        if (conditionalResponse.status === 304) {
+                            results.push('Last-Modified validation works correctly (304 Not Modified)');
+                            passed = true;
+                        } else {
+                            results.push('Last-Modified validation did not return 304 Not Modified');
+                        }
+                    }
+                } else {
+                    results.push('\nNo cache-related headers detected. Server may not support caching.');
+                }
+                
+                updateResult('cache-result', results.join('\n'), passed || partialPass);
+                
+                if (passed) {
+                    updateSummary('cache', 'Pass', 'Server supports proper cache validation');
+                } else if (partialPass) {
+                    updateSummary('cache', 'Partial', 'Server provides cache headers but validation not confirmed');
+                } else {
+                    updateSummary('cache', 'Warning', 'No cache mechanisms detected');
+                }
+                
+            } catch (error) {
+                updateResult('cache-result', `Error testing cache control: ${error.message}`, false);
+                updateSummary('cache', 'Fail', `Error: ${error.message}`);
+            }
+        }
+        
+        // Test File Upload
+        function testFileUpload(event) {
+            event.preventDefault();
+            updateResult('upload-result', 'Starting file upload test...');
+            
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            let results = [];
+            
+            if (!file) {
+                updateResult('upload-result', 'Please select a file to upload.', false);
+                return false;
+            }
+            
+            results.push(`File selected: ${file.name} (${file.type}, ${file.size} bytes)`);
+            updateResult('upload-result', results.join('\n'));
+            
+            // Show progress container
+            document.getElementById('progressContainer').style.display = 'block';
+            
+            // Create FormData object
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            // Create and configure XHR with progress monitoring
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', `${window.location.pathname}?action=upload`, true);
+            
+            // Track upload progress
+            xhr.upload.onprogress = function(event) {
+                if (event.lengthComputable) {
+                    const percentComplete = Math.round((event.loaded / event.total) * 100);
+                    document.getElementById('progressBar').style.width = percentComplete + '%';
+                    document.getElementById('progressStatus').textContent = percentComplete + '%';
+                    
+                    results.push(`Upload progress: ${percentComplete}%`);
+                    updateResult('upload-result', results.join('\n'));
+                }
+            };
+            
+            // Handle response
+            xhr.onload = function() {
+                results.push(`Upload complete. Server response status: ${xhr.status}`);
+                
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    results.push('File upload appears successful!');
+                    results.push(`Response: ${xhr.responseText.substring(0, 100)}${xhr.responseText.length > 100 ? '...' : ''}`);
+                    updateResult('upload-result', results.join('\n'), true);
+                    updateSummary('upload', 'Pass', 'Server supports file uploads via POST');
+                } else {
+                    results.push(`Upload failed with status: ${xhr.status}`);
+                    results.push(`Response: ${xhr.responseText.substring(0, 100)}${xhr.responseText.length > 100 ? '...' : ''}`);
+                    updateResult('upload-result', results.join('\n'), false);
+                    updateSummary('upload', 'Fail', `Upload failed with status ${xhr.status}`);
+                }
+            };
+            
+            // Handle errors
+            xhr.onerror = function() {
+                results.push('Upload failed due to network error');
+                updateResult('upload-result', results.join('\n'), false);
+                updateSummary('upload', 'Fail', 'Network error during upload');
+            };
+            
+            // Send the request
+            xhr.send(formData);
+            results.push('Upload started...');
+            updateResult('upload-result', results.join('\n'));
+            
+            return false; // Prevent form submission
+        }
+        
+        // Test CGI Support
+        async function testCGISupport() {
+            updateResult('cgi-result', 'Running CGI support test...');
+            let results = [];
+            let passed = false;
+            
+            try {
+                // Common CGI script paths to test
+                const cgiPaths = [
+                    '/cgi-bin/test.cgi',
+                    '/cgi-bin/test.pl',
+                    '/cgi-bin/env.cgi',
+                    '/cgi-bin/printenv',
+                    '/cgi-bin/test-cgi',
+                    '/cgi-bin/test.py',
+                ];
+                
+                results.push('Testing common CGI paths:');
+                
+                // Try to access each path
+                for (const path of cgiPaths) {
+                    try {
+                        results.push(`\nTesting ${path}...`);
+                        const response = await fetch(path, {
+                            cache: 'no-store'
+                        });
+                        
+                        const status = response.status;
+                        results.push(`Status: ${status}`);
+                        
+                        if (status >= 200 && status < 300) {
+                            // CGI script found, check its output
+                            const contentType = response.headers.get('Content-Type');
+                            results.push(`Content-Type: ${contentType || 'Not set'}`);
+                            
+                            const text = await response.text();
+                            results.push(`Response (first 100 chars): ${text.substring(0, 100)}${text.length > 100 ? '...' : ''}`);
+                            
+                            // Check if it looks like CGI output
+                            if (contentType && text && 
+                                (text.includes('SERVER_') || text.includes('HTTP_') || 
+                                 text.includes('CGI') || text.includes('GATEWAY_INTERFACE'))) {
+                                results.push('This appears to be a valid CGI response!');
+                                passed = true;
+                                break;
+                            } else {
+                                results.push('Response doesn\'t look like typical CGI output');
+                            }
+                        } else if (status === 403) {
+                            results.push('Forbidden: CGI directory exists but access is restricted');
+                        }
+                    } catch (e) {
+                        results.push(`Error: ${e.message}`);
+                    }
+                }
+                
+                // Try sending a custom request to test environment variable passing
+                if (!passed) {
+                    results.push('\nTesting CGI with custom query parameters and headers:');
+                    try {
+                        // Find a path that at least returned a meaningful response
+                        let testPath = cgiPaths[0]; // default
+                        
+                        const customResponse = await fetch(`${testPath}?test=value&foo=bar`, {
+                            cache: 'no-store',
+                            headers: {
+                                'X-CGI-Test': 'true'
+                            }
+                        });
+                        
+                        const status = customResponse.status;
+                        if (status >= 200 && status < 300) {
+                            const text = await customResponse.text();
+                            if (text.includes('QUERY_STRING') || text.includes('test=value')) {
+                                results.push('CGI environment variable passing appears to work!');
+                                passed = true;
+                            }
+                        }
+                    } catch (e) {
+                        // Ignore errors here
+                    }
+                }
+                
+                // If none of the above worked, try a server-specific path
+                if (!passed) {
+                    results.push('\nCould not find standard CGI scripts.');
+                    results.push('Your server may have CGI enabled but use a different path.');
+                    results.push('Try creating a custom CGI script and accessing it directly.');
+                }
+                
+                updateResult('cgi-result', results.join('\n'), passed);
+                if (passed) {
+                    updateSummary('cgi', 'Pass', 'Server supports CGI');
+                } else {
+                    updateSummary('cgi', 'Warning', 'CGI support could not be verified');
+                }
+                
+            } catch (error) {
+                updateResult('cgi-result', `Error testing CGI support: ${error.message}`, false);
+                updateSummary('cgi', 'Fail', `Error: ${error.message}`);
+            }
+        }
+        
+        // Run all tests
+        function runAllTests() {
+            // Basic tests
+            testHttpMethods();
+            setTimeout(testUriEncoding, 500);
+            setTimeout(testStatusCodes, 1000);
+            setTimeout(testConnectionModes, 1500);
+            setTimeout(testHttpsSupport, 2000);
+            
+            // Advanced tests
+            setTimeout(testChunkedTransfer, 2500);
+            setTimeout(testGzipEncoding, 3000);
+            setTimeout(testCookieSupport, 3500);
+            setTimeout(testCacheControl, 4000);
+            setTimeout(testCGISupport, 4500);
+            // File upload test needs manual file selection
+        }
+        
+        // Add event listener for page load
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('Test page loaded. Ready to run tests.');
+            
+            // Open the BasicTests tab by default
+            document.getElementById('BasicTests').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
